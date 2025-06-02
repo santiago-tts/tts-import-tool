@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TTS Import Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f9fafb;
+      color: #333;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #111;
+    }
+
+    .fa-upload {
+      font-size: 1.75rem;
+      color: #2563eb;
+    }
+
+    section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      transition: transform 0.2s ease;
+    }
+
+    section:hover {
+      transform: translateY(-2px);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    form {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    input[type="file"] {
+      flex-grow: 1;
+    }
+
+    .filename-preview {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .tooltip {
+      position: relative;
+      cursor: help;
+      display: inline-block;
+      margin-left: 0.5rem;
+      width: 22px;
+      height: 22px;
+      background-color: #2563eb;
+      border-radius: 50%;
+      color: white;
+      font-weight: bold;
+      font-size: 0.75rem;
+      text-align: center;
+      line-height: 22px;
+    }
+
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      font-size: 0.75rem;
+      z-index: 10;
+    }
+
+    button {
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button[type="submit"] {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #1d4ed8;
+    }
+
+    .download-btn {
+      margin-top: 1rem;
+      background-color: #28a745;
+      color: white;
+      transition: background 0.3s ease, transform 0.2s ease;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+    }
+
+    .download-btn:hover {
+      background-color: #218838;
+      transform: scale(1.03);
+    }
+
+    .template-btn {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+
+    .template-btn:hover {
+      background-color: #ffe8a1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 0.6rem;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f1f5f9;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .loading {
+      font-size: 0.95rem;
+      color: #999;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <i class="fas fa-upload"></i>
+    <h1>TTS Import Tool</h1>
+  </header>
+
+  <section>
+    <h2>Upload Responsible Person CSV <span class="tooltip" data-tooltip="Uploads CSV to create responsible persons.">?</span></h2>
+    <form id="responsibleForm">
+      <input type="file" name="csvfile" accept=".csv" required />
+      <span class="filename-preview" id="responsibleFileName"></span>
+      <button type="submit">Upload</button>
+      <a href="/mnt/data/Responsible Person ID Generation _ TikTok Shop - Sheet1.csv" download>
+        <button type="button" class="template-btn">Get Template</button>
+      </a>
+    </form>
+    <div class="loading" id="responsibleLoading" style="display:none;">Uploading...</div>
+    <div id="responsibleResults" class="fade-in"></div>
+  </section>
+
+  <section>
+    <h2>Upload Manufacturer CSV <span class="tooltip" data-tooltip="Uploads CSV to create manufacturers.">?</span></h2>
+    <form id="manufacturerForm">
+      <input type="file" name="csvfile" accept=".csv" required />
+      <span class="filename-preview" id="manufacturerFileName"></span>
+      <button type="submit">Upload</button>
+      <a href="/mnt/data/Manufacturer ID Generation _ _ TikTok Shop - Sheet1.csv" download>
+        <button type="button" class="template-btn">Get Template</button>
+      </a>
+    </form>
+    <div class="loading" id="manufacturerLoading" style="display:none;">Uploading...</div>
+    <div id="manufacturerResults" class="fade-in"></div>
+  </section>
+
+  <section>
+    <h2>Upload Recommend Category CSV <span class="tooltip" data-tooltip="Gets suggested category info based on product title.">?</span></h2>
+    <form id="recommendForm">
+      <input type="file" name="csvfile" accept=".csv" required />
+      <span class="filename-preview" id="recommendFileName"></span>
+      <button type="submit">Upload</button>
+      <a href="/mnt/data/Reccomended Category _ Import TikTok Shop - Sheet1.csv" download>
+        <button type="button" class="template-btn">Get Template</button>
+      </a>
+    </form>
+    <div class="loading" id="recommendLoading" style="display:none;">Uploading...</div>
+    <div id="recommendResults" class="fade-in"></div>
+  </section>
+
+  <script>
+    function handleFormSubmit(formId, url, resultId, downloadName) {
+      const form = document.getElementById(formId);
+      const resultsContainer = document.getElementById(resultId);
+      const fileInput = form.querySelector('input[type="file"]');
+      const fileNameSpan = document.getElementById(formId.replace('Form', 'FileName'));
+      const loadingText = document.getElementById(formId.replace('Form', 'Loading'));
+
+      fileInput.addEventListener('change', () => {
+        fileNameSpan.textContent = fileInput.files[0]?.name || '';
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        loadingText.style.display = 'block';
+        resultsContainer.innerHTML = '';
+
+        try {
+          const res = await fetch(url, { method: 'POST', body: formData });
+          const data = await res.json();
+          loadingText.style.display = 'none';
+
+          if (!Array.isArray(data)) throw new Error(data?.error || 'Unexpected response');
+
+          const headers = Object.keys(data[0]);
+          const table = document.createElement('table');
+          const thead = document.createElement('thead');
+          const tbody = document.createElement('tbody');
+
+          const headerRow = document.createElement('tr');
+          headers.forEach(h => {
+            const th = document.createElement('th');
+            th.textContent = h;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            headers.forEach(h => {
+              const td = document.createElement('td');
+              td.textContent = row[h];
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+
+          table.appendChild(thead);
+          table.appendChild(tbody);
+          resultsContainer.appendChild(table);
+
+          const downloadBtn = document.createElement('button');
+          downloadBtn.className = 'download-btn';
+          downloadBtn.textContent = 'Download CSV';
+          downloadBtn.onclick = () => {
+            const csvRows = [headers.join(',')];
+            data.forEach(row => {
+              csvRows.push(headers.map(h => `"${row[h] ?? ''}"`).join(','));
+            });
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = downloadName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          };
+          resultsContainer.appendChild(downloadBtn);
+        } catch (err) {
+          loadingText.style.display = 'none';
+          resultsContainer.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+        }
+      });
+    }
+
+    handleFormSubmit('responsibleForm', '/upload-responsible-person', 'responsibleResults', 'responsible_results.csv');
+    handleFormSubmit('manufacturerForm', '/upload-manufacturer', 'manufacturerResults', 'manufacturer_results.csv');
+    handleFormSubmit('recommendForm', '/upload-recommend-category', 'recommendResults', 'recommend_results.csv');
+  </script>
+</body>
+</html>
