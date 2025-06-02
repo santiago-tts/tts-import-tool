@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TTS Import Tool</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -16,7 +16,7 @@
 
     header {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -31,6 +31,23 @@
     .fa-upload {
       font-size: 1.75rem;
       color: #2563eb;
+    }
+
+    .auth-btn {
+      background-color: #ffcc00;
+      color: #111;
+      font-size: 1rem;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .auth-btn:hover {
+      background-color: #e6b800;
+      transform: scale(1.05);
     }
 
     section {
@@ -49,45 +66,6 @@
     h2 {
       font-size: 1.25rem;
       margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .tooltip {
-      display: inline-block;
-      width: 1.3rem;
-      height: 1.3rem;
-      background-color: #ccc;
-      color: white;
-      font-size: 0.75rem;
-      text-align: center;
-      line-height: 1.3rem;
-      border-radius: 50%;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .tooltip::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 150%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 4px;
-      white-space: nowrap;
-      font-size: 0.75rem;
-      z-index: 10;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-    }
-
-    .tooltip:hover::after {
-      opacity: 1;
     }
 
     form {
@@ -106,6 +84,40 @@
       font-size: 0.9rem;
       color: #555;
       margin-left: 0.5rem;
+    }
+
+    .tooltip {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      text-align: center;
+      border-radius: 50%;
+      background-color: #2563eb;
+      color: white;
+      font-size: 0.75rem;
+      cursor: help;
+      position: relative;
+    }
+
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      font-size: 0.75rem;
+      z-index: 10;
+      display: none;
+    }
+
+    .tooltip:hover::after {
+      display: block;
     }
 
     button {
@@ -131,32 +143,27 @@
       background-color: #28a745;
       color: white;
       padding: 0.6rem 1.2rem;
-      border: none;
       border-radius: 8px;
       font-size: 0.9rem;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
-      transition: background 0.3s ease, transform 0.2s ease;
     }
 
     .download-btn:hover {
       background-color: #218838;
-      transform: scale(1.03);
     }
 
     .template-btn {
-      background-color: #ffeb3b;
-      color: #333;
-      border: none;
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      margin-left: auto;
+      padding: 0.4rem 0.8rem;
       border-radius: 6px;
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+      font-size: 0.85rem;
     }
 
     .template-btn:hover {
-      background-color: #fdd835;
+      background-color: #ffe8a1;
     }
 
     table {
@@ -192,48 +199,63 @@
   </style>
 </head>
 <body>
+
   <header>
     <i class="fas fa-upload"></i>
     <h1>TTS Import Tool</h1>
   </header>
 
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <button class="auth-btn" onclick="window.open('https://services.tiktokshop.com/open/authorize?service_id=7469992164839393079', '_blank')">
+      <i class="fas fa-lock"></i> Authorize TikTok Shop
+    </button>
+
+    <div id="authCodeContainer" style="margin-top: 1rem; display: none;">
+      <label><strong>Authorization Code:</strong></label>
+      <div style="display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+        <input type="text" id="authCode" readonly style="width: 320px; padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc;" />
+        <button class="auth-btn" style="padding: 0.4rem 1rem;" onclick="copyAuthCode()">Copy</button>
+      </div>
+    </div>
+  </div>
+
   <section>
-    <h2>Upload Responsible Person CSV <span class="tooltip" data-tooltip="Upload a CSV to create responsible persons.">?</span></h2>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <h2>Upload Responsible Person CSV <span class="tooltip" data-tooltip="Uploads CSV to create responsible persons.">?</span></h2>
+      <a class="template-btn" href="templates/Responsible%20Person%20ID%20Generation%20_%20TikTok%20Shop%20-%20Sheet1.csv" download>Get Template</a>
+    </div>
     <form id="responsibleForm">
       <input type="file" name="csvfile" accept=".csv" required />
       <span class="filename-preview" id="responsibleFileName"></span>
       <button type="submit">Upload</button>
-      <a href="static/templates/responsible_person_template.csv" download>
-        <button type="button" class="template-btn">Get Template</button>
-      </a>
     </form>
     <div class="loading" id="responsibleLoading" style="display:none;">Uploading...</div>
     <div id="responsibleResults" class="fade-in"></div>
   </section>
 
   <section>
-    <h2>Upload Manufacturer CSV <span class="tooltip" data-tooltip="Upload a CSV to create manufacturers.">?</span></h2>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <h2>Upload Manufacturer CSV <span class="tooltip" data-tooltip="Uploads CSV to create manufacturers.">?</span></h2>
+      <a class="template-btn" href="templates/Manufacturer%20ID%20Generation%20_%20_%20TikTok%20Shop%20-%20Sheet1.csv" download>Get Template</a>
+    </div>
     <form id="manufacturerForm">
       <input type="file" name="csvfile" accept=".csv" required />
       <span class="filename-preview" id="manufacturerFileName"></span>
       <button type="submit">Upload</button>
-      <a href="static/templates/manufacturer_template.csv" download>
-        <button type="button" class="template-btn">Get Template</button>
-      </a>
     </form>
     <div class="loading" id="manufacturerLoading" style="display:none;">Uploading...</div>
     <div id="manufacturerResults" class="fade-in"></div>
   </section>
 
   <section>
-    <h2>Upload Recommend Category CSV <span class="tooltip" data-tooltip="Upload a CSV to get category recommendations.">?</span></h2>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <h2>Upload Recommend Category CSV <span class="tooltip" data-tooltip="Gets suggested category info based on product title.">?</span></h2>
+      <a class="template-btn" href="templates/Reccomended%20Category%20_%20Import%20TikTok%20Shop%20-%20Sheet1.csv" download>Get Template</a>
+    </div>
     <form id="recommendForm">
       <input type="file" name="csvfile" accept=".csv" required />
       <span class="filename-preview" id="recommendFileName"></span>
       <button type="submit">Upload</button>
-      <a href="static/templates/recommended_category_template.csv" download>
-        <button type="button" class="template-btn">Get Template</button>
-      </a>
     </form>
     <div class="loading" id="recommendLoading" style="display:none;">Uploading...</div>
     <div id="recommendResults" class="fade-in"></div>
@@ -324,6 +346,26 @@
     handleFormSubmit('responsibleForm', '/upload-responsible-person', 'responsibleResults', 'responsible_results.csv');
     handleFormSubmit('manufacturerForm', '/upload-manufacturer', 'manufacturerResults', 'manufacturer_results.csv');
     handleFormSubmit('recommendForm', '/upload-recommend-category', 'recommendResults', 'recommend_results.csv');
+
+    // Display auth_code from URL if available
+    const params = new URLSearchParams(window.location.search);
+    const authCode = params.get('auth_code');
+    if (authCode) {
+      const authCodeInput = document.getElementById('authCode');
+      const authCodeContainer = document.getElementById('authCodeContainer');
+      authCodeInput.value = authCode;
+      authCodeContainer.style.display = 'block';
+    }
+
+    function copyAuthCode() {
+      const input = document.getElementById('authCode');
+      input.select();
+      input.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(input.value)
+        .then(() => alert('Authorization code copied!'))
+        .catch(() => alert('Failed to copy authorization code.'));
+    }
   </script>
+
 </body>
 </html>
