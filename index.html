@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TTS Import Tool</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -49,6 +49,45 @@
     h2 {
       font-size: 1.25rem;
       margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .tooltip {
+      display: inline-block;
+      width: 1.3rem;
+      height: 1.3rem;
+      background-color: #ccc;
+      color: white;
+      font-size: 0.75rem;
+      text-align: center;
+      line-height: 1.3rem;
+      border-radius: 50%;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 150%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      font-size: 0.75rem;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .tooltip:hover::after {
+      opacity: 1;
     }
 
     form {
@@ -66,37 +105,7 @@
     .filename-preview {
       font-size: 0.9rem;
       color: #555;
-    }
-
-    .tooltip {
-      position: relative;
-      cursor: help;
-      display: inline-block;
       margin-left: 0.5rem;
-      width: 22px;
-      height: 22px;
-      background-color: #2563eb;
-      border-radius: 50%;
-      color: white;
-      font-weight: bold;
-      font-size: 0.75rem;
-      text-align: center;
-      line-height: 22px;
-    }
-
-    .tooltip:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 4px;
-      white-space: nowrap;
-      font-size: 0.75rem;
-      z-index: 10;
     }
 
     button {
@@ -121,12 +130,13 @@
       margin-top: 1rem;
       background-color: #28a745;
       color: white;
-      transition: background 0.3s ease, transform 0.2s ease;
       padding: 0.6rem 1.2rem;
+      border: none;
       border-radius: 8px;
       font-size: 0.9rem;
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+      transition: background 0.3s ease, transform 0.2s ease;
     }
 
     .download-btn:hover {
@@ -135,13 +145,18 @@
     }
 
     .template-btn {
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
+      background-color: #ffeb3b;
+      color: #333;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     .template-btn:hover {
-      background-color: #ffe8a1;
+      background-color: #fdd835;
     }
 
     table {
@@ -183,12 +198,12 @@
   </header>
 
   <section>
-    <h2>Upload Responsible Person CSV <span class="tooltip" data-tooltip="Uploads CSV to create responsible persons.">?</span></h2>
+    <h2>Upload Responsible Person CSV <span class="tooltip" data-tooltip="Upload a CSV to create responsible persons.">?</span></h2>
     <form id="responsibleForm">
       <input type="file" name="csvfile" accept=".csv" required />
       <span class="filename-preview" id="responsibleFileName"></span>
       <button type="submit">Upload</button>
-      <a href="/mnt/data/Responsible Person ID Generation _ TikTok Shop - Sheet1.csv" download>
+      <a href="static/templates/responsible_person_template.csv" download>
         <button type="button" class="template-btn">Get Template</button>
       </a>
     </form>
@@ -197,12 +212,12 @@
   </section>
 
   <section>
-    <h2>Upload Manufacturer CSV <span class="tooltip" data-tooltip="Uploads CSV to create manufacturers.">?</span></h2>
+    <h2>Upload Manufacturer CSV <span class="tooltip" data-tooltip="Upload a CSV to create manufacturers.">?</span></h2>
     <form id="manufacturerForm">
       <input type="file" name="csvfile" accept=".csv" required />
       <span class="filename-preview" id="manufacturerFileName"></span>
       <button type="submit">Upload</button>
-      <a href="/mnt/data/Manufacturer ID Generation _ _ TikTok Shop - Sheet1.csv" download>
+      <a href="static/templates/manufacturer_template.csv" download>
         <button type="button" class="template-btn">Get Template</button>
       </a>
     </form>
@@ -211,12 +226,12 @@
   </section>
 
   <section>
-    <h2>Upload Recommend Category CSV <span class="tooltip" data-tooltip="Gets suggested category info based on product title.">?</span></h2>
+    <h2>Upload Recommend Category CSV <span class="tooltip" data-tooltip="Upload a CSV to get category recommendations.">?</span></h2>
     <form id="recommendForm">
       <input type="file" name="csvfile" accept=".csv" required />
       <span class="filename-preview" id="recommendFileName"></span>
       <button type="submit">Upload</button>
-      <a href="/mnt/data/Reccomended Category _ Import TikTok Shop - Sheet1.csv" download>
+      <a href="static/templates/recommended_category_template.csv" download>
         <button type="button" class="template-btn">Get Template</button>
       </a>
     </form>
@@ -243,7 +258,11 @@
         resultsContainer.innerHTML = '';
 
         try {
-          const res = await fetch(url, { method: 'POST', body: formData });
+          const res = await fetch(url, {
+            method: 'POST',
+            body: formData
+          });
+
           const data = await res.json();
           loadingText.style.display = 'none';
 
